@@ -1,0 +1,85 @@
+#define _CRT_SECURE_NO_WARNINGS
+
+#include <stdio.h>
+#include <string.h>
+#include <locale.h>
+
+typedef struct {
+    char name[40];
+    char genre[30];
+    int day, month, year;
+    int hour, minute;
+    int duration;
+    float budget;
+} kino;
+
+// Ввод одной записи
+void input(kino* p)
+{
+    printf("Название: ");
+    fgets(p->name, 40, stdin);
+    p->name[strcspn(p->name, "\n")] = 0;
+
+    printf("Жанр: ");
+    fgets(p->genre, 30, stdin);
+    p->genre[strcspn(p->genre, "\n")] = 0;
+
+    printf("День Месяц Год: ");
+    scanf("%d %d %d", &p->day, &p->month, &p->year);
+
+    printf("Час Минуты: ");
+    scanf("%d %d", &p->hour, &p->minute);
+
+    printf("Длительность: ");
+    scanf("%d", &p->duration);
+
+    printf("Бюджет: ");
+    scanf("%f", &p->budget);
+
+    while (getchar() != '\n');
+}
+
+// Запись одной записи в файл (дозапись)
+int writefile(char* fname, kino* p)
+{
+    FILE* out = fopen(fname, "at");
+    if (!out) {
+        printf("Ошибка открытия файла\n");
+        return 0;
+    }
+
+    fprintf(out, "%s;%s;%02d.%02d.%04d;%02d:%02d;%d;%.1f\n",
+        p->name, p->genre,
+        p->day, p->month, p->year,
+        p->hour, p->minute,
+        p->duration, p->budget);
+
+    fclose(out);
+    return 1;
+}
+
+int main()
+{
+    setlocale(LC_ALL, "Russian");
+
+    kino s;
+    int n;
+
+    printf("Сколько записей ввести? ");
+    scanf("%d", &n);
+    while (getchar() != '\n');
+
+    // очищаем файл перед записью
+    FILE* f = fopen("kinoseans.txt", "wt");
+    if (f) fclose(f);
+
+    for (int i = 0; i < n; i++)
+    {
+        printf("\n--- Запись %d ---\n", i + 1);
+        input(&s);
+        writefile("kinoseans.txt", &s);
+    }
+
+    printf("\nДанные записаны в kinoseans.txt\n");
+    return 0;
+}
