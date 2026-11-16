@@ -1,0 +1,108 @@
+#define _CRT_SECURE_NO_WARNINGS
+
+#include <stdio.h>
+#include <string.h>
+#include <locale.h>
+
+typedef struct {
+    char name[40];
+    char genre[25];
+    int day, month, year;
+    int hour, minute;
+    int duration;
+    float budget;
+} kino;
+
+// 1. Ввод одной записи
+void input(kino* p)
+{
+    printf("Название фильма: ");
+    fgets(p->name, 40, stdin);
+    p->name[strcspn(p->name, "\n")] = 0;
+
+    printf("Жанр: ");
+    fgets(p->genre, 25, stdin);
+    p->genre[strcspn(p->genre, "\n")] = 0;
+
+    printf("Дата (день месяц год): ");
+    scanf("%d %d %d", &p->day, &p->month, &p->year);
+
+    printf("Время начала (час минуты): ");
+    scanf("%d %d", &p->hour, &p->minute);
+
+    printf("Продолжительность (мин): ");
+    scanf("%d", &p->duration);
+
+    printf("Бюджет (млн): ");
+    scanf("%f", &p->budget);
+
+    while (getchar() != '\n');
+}
+
+// 2. Вывод одной записи в консоль
+void print(kino* p)
+{
+    printf("--------------------------------------------\n");
+    printf("Фильм:          %s\n", p->name);
+    printf("Жанр:           %s\n", p->genre);
+    printf("Дата:           %02d.%02d.%04d\n", p->day, p->month, p->year);
+    printf("Время начала:   %02d:%02d\n", p->hour, p->minute);
+    printf("Длительность:   %d мин\n", p->duration);
+    printf("Бюджет:         %.1f млн\n", p->budget);
+    printf("--------------------------------------------\n");
+}
+
+// 3. Сохранение одной записи в файл
+int save(const char* fname, kino* p)
+{
+    FILE* out = fopen(fname, "at");
+    if (out == NULL) return 0;
+
+    fprintf(out, "Фильм: %-20s | Жанр: %-12s | Дата: %02d.%02d.%04d | Время: %02d:%02d | Длительность: %3d мин | Бюджет: %6.1f\n",
+        p->name, p->genre,
+        p->day, p->month, p->year,
+        p->hour, p->minute,
+        p->duration, p->budget);
+
+    fclose(out);
+    return 1;
+}
+
+// 4. Проверка результата записи
+void check(int result)
+{
+    if (result)
+        printf("Запись успешно сохранена в файл.\n");
+    else
+        printf("Ошибка! Не удалось сохранить запись.\n");
+}
+
+int main()
+{
+    setlocale(LC_ALL, "Russian");
+
+    kino s;
+    int n;
+
+    printf("Сколько записей киносеансов ввести? ");
+    scanf("%d", &n);
+    while (getchar() != '\n');
+
+    if (n < 1) n = 1;
+
+    // очищаем файл перед началом работы
+    FILE* f = fopen("kinoseans.txt", "wt");
+    if (f) fclose(f);
+
+    for (int i = 0; i < n; i++)
+    {
+        printf("\n========== Запись %d ==========\n", i + 1);
+        
+        input(&s);          // ввод
+        print(&s);          // вывод в консоль
+        check(save("kinoseans.txt", &s));  // сохранение + проверка
+    }
+
+    printf("\nРабота программы завершена. Данные находятся в kinoseans.txt\n");
+    return 0;
+}
